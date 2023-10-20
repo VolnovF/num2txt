@@ -10,21 +10,18 @@ struct СountableThing
     std::string genitiveSingular;   // Родительный падеж единственного числа
     std::string genitivePlural;     // Родительный падеж множественного числа
 };
-
 const СountableThing rubel
 {
     "рубль"  ,
     "рубля"  ,
     "рублей"
 };
-
 const СountableThing thousand
 {
     "тысяча"  ,
     "тысячи"  ,
     "тысяч"
 };
-
 const СountableThing million
 {
     "миллион"   ,
@@ -39,7 +36,6 @@ struct Numerals
     std::array<std::string, 10> teens;    // числа от 10 до 19 включительно
     std::array<std::string, 10> hundreds; // первый элемент - пустая строка как в tens
 };
-
 const Numerals numeralsMale // числа мужского рода
 {
     {
@@ -91,7 +87,6 @@ const Numerals numeralsMale // числа мужского рода
         "девятьсот"
     }
 };
-
 const Numerals numeralsFemale // числа женского рода
 {
     {

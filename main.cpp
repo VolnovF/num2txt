@@ -12,7 +12,7 @@ using digits_t = std::vector<digit_t>;
 
 int readNumber();
 digits_t numberInDigits(int number);
-void printDigitsInText(const digits_t& digits, const int number);
+std::string* digitsInStrings(const size_t* digits, const int size, const int number);
 void printDigitsSector(const digits_t& digits, const int sector, const int radix, const Numerals& numerals, const СountableThing& thing);
 void printСountableThing(const digit_t units, const СountableThing& thing);
 void printUnits(const digit_t units, const Numerals& numerals, const СountableThing& thing);
@@ -23,15 +23,16 @@ size_t* numberInPtr(size_t& size, int number);
 int main()
 {
     const int inputNumber{ readNumber() };
-    digits_t digits{ numberInDigits(inputNumber) };
-    for (size_t i = 0; i < digits.size(); i++)
+    size_t digitsSize{ 0 };
+    size_t* digits{ numberInPtr(digitsSize, inputNumber) };
+    for (size_t i = 0; i < digitsSize; i++)
     {
         std::cout << digits[i];
     }
     std::cout << '\n';
-    size_t size{ 0 };
-    size_t* digitsPtr{ numberInPtr(size, inputNumber) };
-    //printDigitsInText(digits, inputNumber);
+    size_t wordsSize{ digitsSize + 1 };
+    std::string* digitsWords{ new std::string[wordsSize] };
+    digitsInStrings(digits, digitsSize, digitsWords, wordsSize, inputNumber);
     return 0;
 }
 
@@ -43,31 +44,15 @@ int readNumber()
     return number;
 }
 
-digits_t numberInDigits(int number)
+size_t* numberInDigitsPtr(
+    size_t& size,
+    int number)
 {
     std::stack<digit_t> buf;
     for ( ;number != 0; number /= 10)
     {
         buf.push(static_cast<digit_t>( std::abs(number) % 10 ));
-    };
-    size_t size{ buf.size() };
-    digits_t digits;
-    digits.resize(size);
-    for (size_t i = 0; i < size; i++)
-    {
-        digits[i] = buf.top();
-        buf.pop();
     }
-    return digits;
-}
-
-size_t* numberInDigitsPtr(size_t& size, int number)
-{
-    std::stack<digit_t> buf;
-    for ( ;number != 0; number /= 10)
-    {
-        buf.push(static_cast<digit_t>( std::abs(number) % 10 ));
-    };
     size = buf.size();
     size_t* digits = new size_t[size];
     for (size_t i = 0; i < size; i++)
@@ -78,6 +63,47 @@ size_t* numberInDigitsPtr(size_t& size, int number)
     return digits;
 }
 
+std::string* digitsInStrings(
+    size_t* digits,
+    const size_t digitsSize,
+    std::string* strings,
+    const size_t tringsSize,
+    const int number)
+{
+    if ( number < 0 )
+    {
+        std::cout << "минус ";
+    }
+    else if ( number == 0 )
+    {
+        std::cout << "ноль рублей\n";
+        return;
+    }
+    int radix{ static_cast<int>(digitsSize % 3) };
+    int sectorsCount{ static_cast<int>((digitsSize - 1) / 3) };
+    switch ( sectorsCount )
+    {
+    case 2: // миллионы -> сотни миллионов
+        //printDigitsSector(digits, sectorsCount, radix, numeralsMale, million);
+        --sectorsCount;
+        radix = 0;
+        [[fallthrough]]; 
+    case 1: // тысячи -> сотни тысяч
+        //printDigitsSector(digits, sectorsCount, radix, numeralsFemale, thousand);
+        --sectorsCount;
+        radix = 0;
+        [[fallthrough]];
+    case 0: // единицы -> сотни
+        //printDigitsSector(digits, sectorsCount, radix, numeralsMale, rubel);
+        radix = 0;
+        [[fallthrough]];
+    default:
+        break;
+    };
+    std::cout << '\n';
+}
+
+/*
 void printDigitsInText(const digits_t& digits, const int number)
 {
     size_t size{ digits.size() };
@@ -193,3 +219,4 @@ void printСountableThing(const size_t units, const СountableThing& thing)
     };
     std::cout << ' ';
 }
+*/
