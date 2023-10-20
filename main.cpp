@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <string>
 #include <algorithm>
 #include <cmath>
@@ -17,12 +18,20 @@ void printСountableThing(const digit_t units, const СountableThing& thing);
 void printUnits(const digit_t units, const Numerals& numerals, const СountableThing& thing);
 void printTens(const digit_t tens, digit_t units, const Numerals& numerals, const СountableThing& thing);
 void printHundreds(const digit_t hundreds, const digit_t tens, const digit_t units, const int sector, const Numerals& numerals, const СountableThing& thing);
+size_t* numberInPtr(size_t& size, int number);
 
 int main()
 {
     const int inputNumber{ readNumber() };
     digits_t digits{ numberInDigits(inputNumber) };
-    printDigitsInText(digits, inputNumber);
+    for (size_t i = 0; i < digits.size(); i++)
+    {
+        std::cout << digits[i];
+    }
+    std::cout << '\n';
+    size_t size{ 0 };
+    size_t* digitsPtr{ numberInPtr(size, inputNumber) };
+    //printDigitsInText(digits, inputNumber);
     return 0;
 }
 
@@ -36,15 +45,38 @@ int readNumber()
 
 digits_t numberInDigits(int number)
 {
-    digits_t digits{};
+    std::stack<digit_t> buf;
     for ( ;number != 0; number /= 10)
     {
-        digits.push_back(static_cast<digit_t>( std::abs(number) % 10 ));
+        buf.push(static_cast<digit_t>( std::abs(number) % 10 ));
     };
-    std::reverse(digits.begin(), digits.end());
+    size_t size{ buf.size() };
+    digits_t digits;
+    digits.resize(size);
+    for (size_t i = 0; i < size; i++)
+    {
+        digits[i] = buf.top();
+        buf.pop();
+    }
     return digits;
 }
 
+size_t* numberInDigitsPtr(size_t& size, int number)
+{
+    std::stack<digit_t> buf;
+    for ( ;number != 0; number /= 10)
+    {
+        buf.push(static_cast<digit_t>( std::abs(number) % 10 ));
+    };
+    size = buf.size();
+    size_t* digits = new size_t[size];
+    for (size_t i = 0; i < size; i++)
+    {
+        digits[i] = buf.top();
+        buf.pop();
+    }
+    return digits;
+}
 
 void printDigitsInText(const digits_t& digits, const int number)
 {
