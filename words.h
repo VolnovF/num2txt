@@ -4,6 +4,8 @@
 #include <array>
 #include <string>
 
+const std::string minus{ "минус" };
+
 struct СountableThing
 {
     std::string nominativeSingular; // Именительный падеж единственного числа
@@ -39,7 +41,7 @@ struct Numerals
 const Numerals numeralsMale // числа мужского рода
 {
     {
-        ""  ,
+        "ноль"  ,
         "один"  ,
         "два"   ,
         "три"   ,

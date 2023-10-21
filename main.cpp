@@ -12,27 +12,36 @@ using digits_t = std::vector<digit_t>;
 
 int readNumber();
 digits_t numberInDigits(int number);
-std::string* digitsInStrings(const size_t* digits, const int size, const int number);
+const std::string** digitsInStrings(
+        size_t* digits,
+        const size_t digitsSize,
+        size_t& wordsSize,
+        const int number);
 void printDigitsSector(const digits_t& digits, const int sector, const int radix, const Numerals& numerals, const СountableThing& thing);
 void printСountableThing(const digit_t units, const СountableThing& thing);
 void printUnits(const digit_t units, const Numerals& numerals, const СountableThing& thing);
 void printTens(const digit_t tens, digit_t units, const Numerals& numerals, const СountableThing& thing);
 void printHundreds(const digit_t hundreds, const digit_t tens, const digit_t units, const int sector, const Numerals& numerals, const СountableThing& thing);
-size_t* numberInPtr(size_t& size, int number);
+size_t* numberInDigitsPtr(
+        size_t& size,
+        int number);
 
 int main()
 {
     const int inputNumber{ readNumber() };
     size_t digitsSize{ 0 };
-    size_t* digits{ numberInPtr(digitsSize, inputNumber) };
-    for (size_t i = 0; i < digitsSize; i++)
+    size_t* digits{ numberInDigitsPtr(digitsSize, inputNumber) };
+    /*for (size_t i = 0; i < digitsSize; i++)
     {
         std::cout << digits[i];
-    }
+    }*/
     std::cout << '\n';
-    size_t wordsSize{ digitsSize + 1 };
-    std::string* digitsWords{ new std::string[wordsSize] };
-    digitsInStrings(digits, digitsSize, digitsWords, wordsSize, inputNumber);
+    size_t wordsSize{ 0 };
+    const std::string** digitsWords{ digitsInStrings(digits, digitsSize, wordsSize, inputNumber) };
+    for (size_t i = 0; i < wordsSize; i++)
+    {
+        std::cout << *digitsWords[i] << ' ';
+    }
     return 0;
 }
 
@@ -45,9 +54,14 @@ int readNumber()
 }
 
 size_t* numberInDigitsPtr(
-    size_t& size,
-    int number)
+        size_t& size,
+        int number)
 {
+    if (number == 0)
+    {
+        size = 1;
+        return nullptr;
+    }
     std::stack<digit_t> buf;
     for ( ;number != 0; number /= 10)
     {
@@ -63,22 +77,31 @@ size_t* numberInDigitsPtr(
     return digits;
 }
 
-std::string* digitsInStrings(
-    size_t* digits,
-    const size_t digitsSize,
-    std::string* strings,
-    const size_t tringsSize,
-    const int number)
+const std::string** digitsInStrings(
+        size_t* digits,
+        const size_t digitsSize,
+        size_t& wordsSize,
+        const int number)
 {
-    if ( number < 0 )
+    wordsSize = digitsSize + 1;
+    bool negative{ number < 0 };
+    if ( negative )
     {
-        std::cout << "минус ";
+        wordsSize++;
     }
-    else if ( number == 0 )
+    
+    const std::string** words{ new const std::string*[wordsSize] };
+    if ( number == 0 )
     {
-        std::cout << "ноль рублей\n";
-        return;
+        words[0] = &numeralsMale.units[0];
+        words[1] = &rubel.genitivePlural;
+        return words;
     }
+    if ( negative )
+    {
+        words[0] = &minus;
+    }
+
     int radix{ static_cast<int>(digitsSize % 3) };
     int sectorsCount{ static_cast<int>((digitsSize - 1) / 3) };
     switch ( sectorsCount )
@@ -100,8 +123,9 @@ std::string* digitsInStrings(
     default:
         break;
     };
-    std::cout << '\n';
+    return words;
 }
+
 
 /*
 void printDigitsInText(const digits_t& digits, const int number)
