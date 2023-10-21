@@ -13,11 +13,19 @@ using digits_t = std::vector<digit_t>;
 int readNumber();
 digits_t numberInDigits(int number);
 const std::string** digitsInStrings(
-        size_t* digits,
+        const size_t* digits,
         const size_t digitsSize,
         size_t& wordsSize,
         const int number);
-void printDigitsSector(const digits_t& digits, const int sector, const int radix, const Numerals& numerals, const СountableThing& thing);
+void printDigitsSector(
+        const size_t* digits,
+        const size_t digitsSize,
+        const int sector,
+        const int radix,
+        const std::string** words,
+        size_t wordsSize,
+        const Numerals& numerals,
+        const СountableThing& thing);
 void printСountableThing(const digit_t units, const СountableThing& thing);
 void printUnits(const digit_t units, const Numerals& numerals, const СountableThing& thing);
 void printTens(const digit_t tens, digit_t units, const Numerals& numerals, const СountableThing& thing);
@@ -38,10 +46,10 @@ int main()
     std::cout << '\n';
     size_t wordsSize{ 0 };
     const std::string** digitsWords{ digitsInStrings(digits, digitsSize, wordsSize, inputNumber) };
-    for (size_t i = 0; i < wordsSize; i++)
+    /*for (size_t i = 0; i < wordsSize; i++)
     {
         std::cout << *digitsWords[i] << ' ';
-    }
+    }*/
     return 0;
 }
 
@@ -78,18 +86,20 @@ size_t* numberInDigitsPtr(
 }
 
 const std::string** digitsInStrings(
-        size_t* digits,
+        const size_t* digits,
         const size_t digitsSize,
         size_t& wordsSize,
         const int number)
 {
-    wordsSize = digitsSize + 1;
+    int radix{ static_cast<int>(digitsSize % 3) };
+    int sectorsCount{ static_cast<int>((digitsSize - 1) / 3) };
+    wordsSize = digitsSize + sectorsCount + 1;
     bool negative{ number < 0 };
     if ( negative )
     {
         wordsSize++;
     }
-    
+
     const std::string** words{ new const std::string*[wordsSize] };
     if ( number == 0 )
     {
@@ -101,23 +111,33 @@ const std::string** digitsInStrings(
     {
         words[0] = &minus;
     }
-
-    int radix{ static_cast<int>(digitsSize % 3) };
-    int sectorsCount{ static_cast<int>((digitsSize - 1) / 3) };
+    //std::cout << "wordsSize: " << wordsSize  << '\n'; 
     switch ( sectorsCount )
     {
     case 2: // миллионы -> сотни миллионов
-        //printDigitsSector(digits, sectorsCount, radix, numeralsMale, million);
+        printDigitsSector(
+            digits, digitsSize,
+            sectorsCount, radix,
+            words, wordsSize,
+            numeralsMale, million);
         --sectorsCount;
         radix = 0;
         [[fallthrough]]; 
     case 1: // тысячи -> сотни тысяч
-        //printDigitsSector(digits, sectorsCount, radix, numeralsFemale, thousand);
+        printDigitsSector(
+            digits, digitsSize,
+            sectorsCount, radix,
+            words, wordsSize,
+            numeralsFemale, thousand);
         --sectorsCount;
         radix = 0;
         [[fallthrough]];
     case 0: // единицы -> сотни
-        //printDigitsSector(digits, sectorsCount, radix, numeralsMale, rubel);
+        printDigitsSector(
+            digits, digitsSize,
+            sectorsCount, radix,
+            words, wordsSize,
+            numeralsMale, rubel);
         radix = 0;
         [[fallthrough]];
     default:
@@ -126,6 +146,42 @@ const std::string** digitsInStrings(
     return words;
 }
 
+void printDigitsSector(
+        const size_t* digits,
+        const size_t digitsSize,
+        const int sector,
+        const int radix,
+        const std::string** words,
+        size_t wordsSize,
+        const Numerals& numerals,
+        const СountableThing& thing)
+{
+    size_t unit{ digitsSize - static_cast<size_t>(1 + 3 * sector) };
+    size_t ten{ digitsSize - static_cast<size_t>(2 + 3 * sector) };
+    size_t hundred{ digitsSize - static_cast<size_t>(3 + 3 * sector) };
+    //std::cout << '\n' << wordsSize << '\n';
+    const std::string* firstWord;
+    switch ( radix )
+    {
+    case 0: // сотни
+        firstWord = words[ wordsSize - static_cast<size_t>(4 + 4 * sector) ];
+        //std::cout << "firstWord: " << (wordsSize - static_cast<size_t>(4 + 4 * sector)) << "\n";
+        //printHundreds(digits[hundred], digits[ten], digits[unit], sector, numerals, thing);
+        break;
+    case 2: // десятки
+        firstWord = words[ wordsSize - static_cast<size_t>(3 + 4 * sector) ];
+        //std::cout << "firstWord: " << (wordsSize - static_cast<size_t>(3 + 4 * sector)) << "\n";
+        //printTens(digits[ten], digits[unit], numerals, thing);
+        break;
+    case 1: // единицы
+        firstWord = words[ wordsSize - static_cast<size_t>(2 + 4 * sector) ];
+        //std::cout << "firstWord: " << (wordsSize - static_cast<size_t>(2 + 4 * sector)) << "\n";
+        //printUnits(digits[unit], numerals, thing);
+        break;
+    default:
+        break;
+    };
+}
 
 /*
 void printDigitsInText(const digits_t& digits, const int number)
