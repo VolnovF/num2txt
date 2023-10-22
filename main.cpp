@@ -26,7 +26,11 @@ void printDigitsSector(
         size_t wordsSize,
         const Numerals& numerals,
         const СountableThing& thing);
-void printСountableThing(const digit_t units, const СountableThing& thing);
+void printСountableThing(
+        const size_t units,
+        const std::string** words,
+        const size_t wordIndex,
+        const СountableThing& thing);
 void printUnits(
         const size_t units,
         const std::string** words,
@@ -66,10 +70,13 @@ int main()
     std::cout << '\n';
     size_t wordsSize{ 0 };
     const std::string** digitsWords{ digitsInStrings(digits, digitsSize, wordsSize, inputNumber) };
-    /*for (size_t i = 0; i < wordsSize; i++)
+    for (size_t i = 0; i < wordsSize; i++)
     {
+        if (digitsWords[i])
+        {
         std::cout << *digitsWords[i] << ' ';
-    }*/
+        }
+    }
     return 0;
 }
 
@@ -220,7 +227,10 @@ void printUnits(
         const СountableThing& thing)
 {
     words[wordIndex] = &numerals.units[ units ];
-    //printСountableThing(units, thing);
+    printСountableThing(
+        units,
+        words, wordIndex + 1,
+        thing);
 }
 void printTens(
         const size_t tens,
@@ -234,7 +244,10 @@ void printTens(
     {
         words[wordIndex] = &numerals.teens[ tens ];
         words[wordIndex + 1] = nullptr;
-        //printСountableThing(0, thing);
+        printСountableThing(
+            0,
+            words, wordIndex + 2,
+            thing);
         return;
     }
     words[wordIndex] = &numerals.tens[ tens ];
@@ -261,12 +274,40 @@ void printHundreds(
         }
         return;
     }
-    //std::cout << numerals.hundreds[ hundreds ] << (hundreds ? " " : "");
     words[wordIndex] = &numerals.hundreds[ hundreds ];
     printTens(
         tens, units,
         words, wordIndex + 1,
         numerals, thing);
+}
+
+void printСountableThing(
+        const size_t units,
+        const std::string** words,
+        const size_t wordIndex,
+        const СountableThing& thing)
+{
+    switch ( units )
+    {
+    case 0:
+    case 9:
+    case 8:
+    case 7:
+    case 6:
+    case 5:
+        words[wordIndex] = &thing.genitivePlural;
+        break;
+    case 4:
+    case 3:
+    case 2:
+        words[wordIndex] = &thing.genitiveSingular;
+        break;
+    case 1:
+        words[wordIndex] = &thing.nominativeSingular;
+        break;
+    default:
+        break;
+    };
 }
 
 /*
