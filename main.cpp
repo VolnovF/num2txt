@@ -27,9 +27,28 @@ void printDigitsSector(
         const Numerals& numerals,
         const СountableThing& thing);
 void printСountableThing(const digit_t units, const СountableThing& thing);
-void printUnits(const digit_t units, const Numerals& numerals, const СountableThing& thing);
-void printTens(const digit_t tens, digit_t units, const Numerals& numerals, const СountableThing& thing);
-void printHundreds(const digit_t hundreds, const digit_t tens, const digit_t units, const int sector, const Numerals& numerals, const СountableThing& thing);
+void printUnits(
+        const size_t units,
+        const std::string** words,
+        const size_t wordIndex,
+        const Numerals& numerals,
+        const СountableThing& thing);
+void printTens(
+        const size_t tens,
+        const size_t units,
+        const std::string** words,
+        const size_t wordIndex,
+        const Numerals& numerals,
+        const СountableThing& thing);
+void printHundreds(
+        const digit_t hundreds,
+        const digit_t tens,
+        const digit_t units,
+        const int sector,
+        const std::string** words,
+        const size_t wordIndex,
+        const Numerals& numerals,
+        const СountableThing& thing);
 size_t* numberInDigitsPtr(
         size_t& size,
         int number);
@@ -41,7 +60,8 @@ int main()
     size_t* digits{ numberInDigitsPtr(digitsSize, inputNumber) };
     /*for (size_t i = 0; i < digitsSize; i++)
     {
-        std::cout << digits[i];
+        std::cout << digits[i];    std::cout << wordIndex << ' ' << wordIndex + 1 << ' ' << wordIndex + 2;
+
     }*/
     std::cout << '\n';
     size_t wordsSize{ 0 };
@@ -160,27 +180,93 @@ void printDigitsSector(
     size_t ten{ digitsSize - static_cast<size_t>(2 + 3 * sector) };
     size_t hundred{ digitsSize - static_cast<size_t>(3 + 3 * sector) };
     //std::cout << '\n' << wordsSize << '\n';
-    const std::string* firstWord;
+    size_t wordIndex;
     switch ( radix )
     {
     case 0: // сотни
-        firstWord = words[ wordsSize - static_cast<size_t>(4 + 4 * sector) ];
-        //std::cout << "firstWord: " << (wordsSize - static_cast<size_t>(4 + 4 * sector)) << "\n";
-        //printHundreds(digits[hundred], digits[ten], digits[unit], sector, numerals, thing);
+        wordIndex = wordsSize - static_cast<size_t>(4 + 4 * sector);
+        //std::cout << "wordIndex: " << wordIndex << "\n";
+        printHundreds(
+            digits[hundred], digits[ten], digits[unit], sector,
+            words, wordIndex,
+            numerals, thing);
         break;
     case 2: // десятки
-        firstWord = words[ wordsSize - static_cast<size_t>(3 + 4 * sector) ];
-        //std::cout << "firstWord: " << (wordsSize - static_cast<size_t>(3 + 4 * sector)) << "\n";
-        //printTens(digits[ten], digits[unit], numerals, thing);
+        wordIndex = wordsSize - static_cast<size_t>(3 + 4 * sector);
+        //std::cout << "wordIndex: " << wordIndex << "\n";
+        printTens(
+            digits[ten], digits[unit],
+            words, wordIndex,
+            numerals, thing);
         break;
     case 1: // единицы
-        firstWord = words[ wordsSize - static_cast<size_t>(2 + 4 * sector) ];
-        //std::cout << "firstWord: " << (wordsSize - static_cast<size_t>(2 + 4 * sector)) << "\n";
-        //printUnits(digits[unit], numerals, thing);
+        wordIndex = wordsSize - static_cast<size_t>(2 + 4 * sector);
+        //std::cout << "wordIndex: " << wordIndex << "\n";
+        printUnits(
+            digits[unit],
+            words, wordIndex,
+            numerals, thing);
         break;
     default:
         break;
     };
+}
+
+void printUnits(
+        const size_t units,
+        const std::string** words,
+        const size_t wordIndex,
+        const Numerals& numerals,
+        const СountableThing& thing)
+{
+    words[wordIndex] = &numerals.units[ units ];
+    //printСountableThing(units, thing);
+}
+void printTens(
+        const size_t tens,
+        const size_t units,
+        const std::string** words,
+        const size_t wordIndex,
+        const Numerals& numerals,
+        const СountableThing& thing)
+{
+    if (tens == 1)
+    {
+        words[wordIndex] = &numerals.teens[ tens ];
+        words[wordIndex + 1] = nullptr;
+        //printСountableThing(0, thing);
+        return;
+    }
+    words[wordIndex] = &numerals.tens[ tens ];
+    printUnits(
+        units, 
+        words, wordIndex + 1,
+        numerals, thing);
+}
+void printHundreds(
+        const digit_t hundreds,
+        const digit_t tens,
+        const digit_t units,
+        const int sector,
+        const std::string** words,
+        const size_t wordIndex,
+        const Numerals& numerals,
+        const СountableThing& thing)
+{
+    if ((hundreds + tens + units) == 0 && (sector != 0))
+    {
+        for (size_t i = 0; i < 4; i++)
+        {
+            words[wordIndex + i] = nullptr;
+        }
+        return;
+    }
+    //std::cout << numerals.hundreds[ hundreds ] << (hundreds ? " " : "");
+    words[wordIndex] = &numerals.hundreds[ hundreds ];
+    printTens(
+        tens, units,
+        words, wordIndex + 1,
+        numerals, thing);
 }
 
 /*
