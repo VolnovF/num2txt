@@ -8,11 +8,9 @@
 #include "words.h"
 
 using digit_t = size_t;
-using digits_t = std::vector<digit_t>;
 using stringDigits_t = const std::string**;
 
 int readNumber();
-digits_t numberInDigits(int number);
 stringDigits_t digitsInStringsDigits(
         const size_t* digits,
         const size_t digitsSize,
@@ -68,11 +66,6 @@ int main()
     size_t* digits{
         numberInDigitsPtr(digitsSize, inputNumber)
     };
-    /*for (size_t i = 0; i < digitsSize; i++)
-    {
-        std::cout << digits[i];    std::cout << wordIndex << ' ' << wordIndex + 1 << ' ' << wordIndex + 2;
-
-    }*/
     std::cout << '\n';
     size_t wordsSize{ 0 };
     stringDigits_t digitsWords{ 
@@ -83,6 +76,8 @@ int main()
     printStringsDigits(
         digitsWords,
         wordsSize);
+    delete[] digits;
+    delete[] digitsWords;
     return 0;
 }
 
